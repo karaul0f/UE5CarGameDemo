@@ -1,0 +1,40 @@
+// EjectedDriver.h - The driver that gets yeeted out of the car like a true FlatOut champion.
+// "Do you like what you see?" - Billy Herrington
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "EjectedDriver.generated.h"
+
+class USpringArmComponent;
+class UCameraComponent;
+class UStaticMeshComponent;
+
+/**
+ * Actor representing the driver ejected from the vehicle on heavy impact.
+ * Spawned with physics simulation and launched into the air.
+ * Uses a static mesh (sphere) by default. Replace BodyMesh with a
+ * USkeletalMeshComponent + PhysicsAsset in a Blueprint subclass for proper ragdoll.
+ */
+UCLASS()
+class CARGAME_API AEjectedDriver : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	AEjectedDriver();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> BodyMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<USpringArmComponent> SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<UCameraComponent> Camera;
+
+	/** Launch the body with the given velocity and add random tumble spin */
+	UFUNCTION(BlueprintCallable, Category = "Ejection")
+	void Launch(FVector LaunchVelocity);
+};
