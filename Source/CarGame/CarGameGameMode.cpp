@@ -4,10 +4,20 @@
 #include "CarGameGameMode.h"
 #include "CarPawn.h"
 #include "TestArena.h"
+#include "UObject/ConstructorHelpers.h"
 
 ACarGameGameMode::ACarGameGameMode()
 {
-	DefaultPawnClass = ACarPawn::StaticClass();
+	static ConstructorHelpers::FClassFinder<APawn> CarPawnBP(
+		TEXT("/Game/Blueprints/BP_CarPawn"));
+	if (CarPawnBP.Succeeded())
+	{
+		DefaultPawnClass = CarPawnBP.Class;
+	}
+	else
+	{
+		DefaultPawnClass = ACarPawn::StaticClass();
+	}
 }
 
 void ACarGameGameMode::BeginPlay()
