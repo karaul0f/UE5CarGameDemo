@@ -50,14 +50,14 @@ public:
 	// ---- Vehicle Physics ----
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vehicle|Physics")
-	float EngineForce = 800000.f;
+	float EngineForce = 1600000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vehicle|Physics")
 	float ReverseForceMultiplier = 0.6f;
 
 	/** Degrees/s^2 angular acceleration for steering (mass-independent) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vehicle|Physics")
-	float SteeringTorque = 180.f;
+	float SteeringTorque = 360.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vehicle|Physics")
 	float BrakeDeceleration = 1500.f;
