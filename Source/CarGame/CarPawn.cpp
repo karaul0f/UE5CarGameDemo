@@ -344,6 +344,14 @@ void ACarPawn::EjectDriver(FVector ImpactNormal)
 
 	if (ActiveEjectedDriver)
 	{
+		// Initialize ejected camera rotation from current car camera — smooth
+		// transition, no jarring snap. "Thank you sir!" — Billy Herrington
+		if (ActiveEjectedDriver->SpringArm)
+		{
+			ActiveEjectedDriver->SpringArm->SetWorldRotation(
+				SpringArm->GetComponentRotation());
+		}
+
 		ActiveEjectedDriver->Launch(LaunchVelocity);
 
 		if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -410,6 +418,17 @@ void ACarPawn::HandleResetDriver(const FInputActionValue& Value)
 void ACarPawn::HandleLook(const FInputActionValue& Value)
 {
 	FVector2D LookValue = Value.Get<FVector2D>();
+
+	// When ejected, control the EjectedDriver's camera (absolute rotation)
+	if (bIsDriverEjected && ActiveEjectedDriver && ActiveEjectedDriver->SpringArm)
+	{
+		FRotator CurrentRot = ActiveEjectedDriver->SpringArm->GetComponentRotation();
+		CurrentRot.Yaw += LookValue.X;
+		CurrentRot.Pitch = FMath::Clamp(CurrentRot.Pitch - LookValue.Y, -80.f, 10.f);
+		ActiveEjectedDriver->SpringArm->SetWorldRotation(CurrentRot);
+		return;
+	}
+
 	FRotator CurrentRot = SpringArm->GetRelativeRotation();
 	CurrentRot.Yaw += LookValue.X;
 	CurrentRot.Pitch = FMath::Clamp(CurrentRot.Pitch - LookValue.Y, -80.f, 10.f);

@@ -28,18 +28,18 @@ AEjectedDriver::AEjectedDriver()
 		BodyMesh->SetWorldScale3D(FVector(0.5f));
 	}
 
-	// Spring arm for smooth camera follow
+	// Spring arm for smooth camera follow — absolute rotation so it doesn't
+	// tumble with the physics body like a dungeon slave
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(BodyMesh);
 	SpringArm->TargetArmLength = 500.f;
+	SpringArm->SetAbsolute(false, true, false);
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->CameraLagSpeed = 3.f;
 	SpringArm->bEnableCameraRotationLag = true;
 	SpringArm->CameraRotationLagSpeed = 3.f;
 	SpringArm->bDoCollisionTest = true;
-	SpringArm->SetRelativeRotation(FRotator(-25.f, 0.f, 0.f));
-	SpringArm->bInheritPitch = false;
-	SpringArm->bInheritRoll = false;
+	SpringArm->SetWorldRotation(FRotator(-25.f, 0.f, 0.f));
 
 	// Camera
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
