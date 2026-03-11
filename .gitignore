@@ -74,3 +74,6 @@ Desktop.ini
 # JetBrains Rider
 .idea/
 *.iml
+
+# Claude Code (local settings, memory)
+.claude/
