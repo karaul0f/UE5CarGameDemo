@@ -343,6 +343,13 @@ void ACarPawn::EjectDriver(FVector ImpactNormal)
 
 	if (ActiveEjectedDriver)
 	{
+		// Copy skeletal mesh from car's driver so the ejected body looks the same
+		if (ActiveEjectedDriver->BodyMesh && DriverMesh->GetSkeletalMeshAsset())
+		{
+			ActiveEjectedDriver->BodyMesh->SetSkeletalMeshAsset(DriverMesh->GetSkeletalMeshAsset());
+			ActiveEjectedDriver->BodyMesh->SetWorldScale3D(DriverMesh->GetComponentScale());
+		}
+
 		// Initialize ejected camera rotation from current car camera — smooth
 		// transition, no jarring snap. "Thank you sir!" — Billy Herrington
 		if (ActiveEjectedDriver->SpringArm)

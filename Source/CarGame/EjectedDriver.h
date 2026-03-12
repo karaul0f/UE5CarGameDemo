@@ -9,13 +9,12 @@
 
 class USpringArmComponent;
 class UCameraComponent;
-class UStaticMeshComponent;
+class USkeletalMeshComponent;
 
 /**
  * Actor representing the driver ejected from the vehicle on heavy impact.
  * Spawned with physics simulation and launched into the air.
- * Uses a static mesh (sphere) by default. Replace BodyMesh with a
- * USkeletalMeshComponent + PhysicsAsset in a Blueprint subclass for proper ragdoll.
+ * Copies the skeletal mesh from the car's DriverMesh for visual consistency.
  */
 UCLASS()
 class CARGAME_API AEjectedDriver : public AActor
@@ -26,7 +25,7 @@ public:
 	AEjectedDriver();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> BodyMesh;
+	TObjectPtr<USkeletalMeshComponent> BodyMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArm;
