@@ -332,7 +332,7 @@ void ACarPawn::EjectDriver(FVector ImpactNormal)
 		+ LaunchDir * EjectionUpwardBoost
 		+ FVector::UpVector * EjectionUpwardBoost;
 
-	FVector SpawnLocation = VehicleCollision->GetComponentLocation() + FVector(0.f, 0.f, 200.f);
+	FVector SpawnLocation = VehicleCollision->GetComponentLocation() + FVector(0.f, 0.f, 55.f);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride =

@@ -83,10 +83,10 @@ public:
 	float EjectionImpactThreshold = 200000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ejection")
-	float EjectionLaunchSpeedMultiplier = 1.5f;
+	float EjectionLaunchSpeedMultiplier = 0.75f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ejection")
-	float EjectionUpwardBoost = 800.f;
+	float EjectionUpwardBoost = 400.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ejection")
 	float CameraBlendTime = 0.3f;
