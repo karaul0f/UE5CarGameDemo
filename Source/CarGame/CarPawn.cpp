@@ -332,22 +332,23 @@ void ACarPawn::EjectDriver(FVector ImpactNormal)
 		+ LaunchDir * EjectionUpwardBoost
 		+ FVector::UpVector * EjectionUpwardBoost;
 
-	FVector SpawnLocation = DriverMesh->GetComponentLocation() + FVector(0.f, 0.f, 100.f);
+	FVector SpawnLocation = VehicleCollision->GetComponentLocation() + FVector(0.f, 0.f, 200.f);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride =
-		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	ActiveEjectedDriver = GetWorld()->SpawnActor<AEjectedDriver>(
 		EjectedDriverClass, SpawnLocation, GetActorRotation(), SpawnParams);
 
 	if (ActiveEjectedDriver)
 	{
-		// Copy skeletal mesh from car's driver so the ejected body looks the same
-		if (ActiveEjectedDriver->BodyMesh && DriverMesh->GetSkeletalMeshAsset())
+		// Prevent sphere from colliding with the car — otherwise it gets stuck
+		// or physics freaks out from the overlap at spawn
+		if (ActiveEjectedDriver->BodyMesh)
 		{
-			ActiveEjectedDriver->BodyMesh->SetSkeletalMeshAsset(DriverMesh->GetSkeletalMeshAsset());
-			ActiveEjectedDriver->BodyMesh->SetWorldScale3D(DriverMesh->GetComponentScale());
+			ActiveEjectedDriver->BodyMesh->IgnoreActorWhenMoving(this, true);
+			VehicleCollision->IgnoreActorWhenMoving(ActiveEjectedDriver, true);
 		}
 
 		// Initialize ejected camera rotation from current car camera — smooth
