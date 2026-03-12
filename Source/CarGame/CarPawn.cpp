@@ -5,6 +5,7 @@
 #include "EjectedDriver.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -59,19 +60,12 @@ ACarPawn::ACarPawn()
 		CarBodyMesh->SetRelativeScale3D(FVector(4.f, 2.f, 0.8f));
 	}
 
-	// ---- Driver mesh (sphere) ----
-	DriverMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DriverMesh"));
+	// ---- Driver mesh (skeletal — assign in Blueprint) ----
+	DriverMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DriverMesh"));
 	DriverMesh->SetupAttachment(VehicleCollision);
 	DriverMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DriverMesh->SetRelativeLocation(FVector(-30.f, -25.f, 60.f));
 	DriverMesh->SetRelativeScale3D(FVector(0.4f));
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereFinder(
-		TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-	if (SphereFinder.Succeeded())
-	{
-		DriverMesh->SetStaticMesh(SphereFinder.Object);
-	}
 
 	// ---- Third-person camera ----
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));

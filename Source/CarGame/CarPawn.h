@@ -39,7 +39,7 @@ public:
 
 	/** Visual mesh for the driver sitting inside */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Driver")
-	TObjectPtr<UStaticMeshComponent> DriverMesh;
+	TObjectPtr<USkeletalMeshComponent> DriverMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArm;
