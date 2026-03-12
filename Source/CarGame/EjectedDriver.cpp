@@ -2,14 +2,15 @@
 // "That's the right way to do it!" - Van Darkholme
 
 #include "EjectedDriver.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "UObject/ConstructorHelpers.h"
 
 AEjectedDriver::AEjectedDriver()
 {
-	// Body mesh - skeletal, will be copied from CarPawn's DriverMesh at spawn
-	BodyMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BodyMesh"));
+	// Body mesh - a sphere by default, simulating physics
+	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
 	SetRootComponent(BodyMesh);
 	BodyMesh->SetSimulatePhysics(true);
 	BodyMesh->SetEnableGravity(true);
@@ -18,6 +19,14 @@ AEjectedDriver::AEjectedDriver()
 	BodyMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	BodyMesh->SetNotifyRigidBodyCollision(true);
 	BodyMesh->BodyInstance.bUseCCD = true;
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(
+		TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	if (SphereMeshAsset.Succeeded())
+	{
+		BodyMesh->SetStaticMesh(SphereMeshAsset.Object);
+		BodyMesh->SetWorldScale3D(FVector(0.5f));
+	}
 
 	// Spring arm for smooth camera follow — absolute rotation so it doesn't
 	// tumble with the physics body like a dungeon slave
