@@ -11,7 +11,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
-#include "InputModifiers.h"
 #include "GameFramework/PlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -190,10 +189,15 @@ void ACarPawn::ApplyVehiclePhysics(float DeltaTime)
 
 void ACarPawn::CreateDefaultInputActions()
 {
-	if (!ThrottleAction)
+	if (!AccelerateAction)
 	{
-		ThrottleAction = NewObject<UInputAction>(this, TEXT("IA_Throttle"));
-		ThrottleAction->ValueType = EInputActionValueType::Axis1D;
+		AccelerateAction = NewObject<UInputAction>(this, TEXT("IA_Accelerate"));
+		AccelerateAction->ValueType = EInputActionValueType::Boolean;
+	}
+	if (!ReverseAction)
+	{
+		ReverseAction = NewObject<UInputAction>(this, TEXT("IA_Reverse"));
+		ReverseAction->ValueType = EInputActionValueType::Boolean;
 	}
 	if (!SteeringAction)
 	{
@@ -225,9 +229,8 @@ void ACarPawn::CreateDefaultInputActions()
 	{
 		DrivingMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Driving"));
 
-		DrivingMappingContext->MapKey(ThrottleAction, EKeys::W);
-		FEnhancedActionKeyMapping& Rev = DrivingMappingContext->MapKey(ThrottleAction, EKeys::S);
-		Rev.Modifiers.Add(NewObject<UInputModifierNegate>(this));
+		DrivingMappingContext->MapKey(AccelerateAction, EKeys::W);
+		DrivingMappingContext->MapKey(ReverseAction, EKeys::S);
 
 		DrivingMappingContext->MapKey(SteeringAction, EKeys::D);
 		FEnhancedActionKeyMapping& Left = DrivingMappingContext->MapKey(SteeringAction, EKeys::A);
@@ -286,8 +289,10 @@ bool ACarPawn::TrySetupInput()
 	FInputModeGameOnly InputMode;
 	PC->SetInputMode(InputMode);
 
-	EIC->BindAction(ThrottleAction, ETriggerEvent::Triggered, this, &ACarPawn::HandleThrottle);
-	EIC->BindAction(ThrottleAction, ETriggerEvent::Completed, this, &ACarPawn::HandleThrottle);
+	EIC->BindAction(AccelerateAction, ETriggerEvent::Triggered, this, &ACarPawn::HandleAccelerate);
+	EIC->BindAction(AccelerateAction, ETriggerEvent::Completed, this, &ACarPawn::HandleAccelerate);
+	EIC->BindAction(ReverseAction, ETriggerEvent::Triggered, this, &ACarPawn::HandleReverse);
+	EIC->BindAction(ReverseAction, ETriggerEvent::Completed, this, &ACarPawn::HandleReverse);
 	EIC->BindAction(SteeringAction, ETriggerEvent::Triggered, this, &ACarPawn::HandleSteering);
 	EIC->BindAction(SteeringAction, ETriggerEvent::Completed, this, &ACarPawn::HandleSteering);
 	EIC->BindAction(BrakeAction, ETriggerEvent::Triggered, this, &ACarPawn::HandleBrake);
@@ -377,6 +382,7 @@ void ACarPawn::ResetDriver()
 	CurrentThrottle = 0.f;
 	CurrentSteering = 0.f;
 	bIsBraking = false;
+	bIsReversing = false;
 	bIsHandbraking = false;
 
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -387,9 +393,18 @@ void ACarPawn::ResetDriver()
 
 // ---- Input Handlers ----
 
-void ACarPawn::HandleThrottle(const FInputActionValue& Value)
+void ACarPawn::HandleAccelerate(const FInputActionValue& Value)
 {
-	CurrentThrottle = bIsDriverEjected ? 0.f : Value.Get<float>();
+	bool bPressed = Value.Get<bool>();
+	if (bIsDriverEjected) bPressed = false;
+	CurrentThrottle = bPressed ? 1.f : (bIsReversing ? -1.f : 0.f);
+}
+
+void ACarPawn::HandleReverse(const FInputActionValue& Value)
+{
+	bIsReversing = Value.Get<bool>();
+	if (bIsDriverEjected) bIsReversing = false;
+	CurrentThrottle = bIsReversing ? -1.f : (CurrentThrottle > 0.f ? 1.f : 0.f);
 }
 
 void ACarPawn::HandleSteering(const FInputActionValue& Value)

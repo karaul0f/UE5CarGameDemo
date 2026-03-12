@@ -100,7 +100,10 @@ public:
 	TObjectPtr<UInputMappingContext> DrivingMappingContext;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> ThrottleAction;
+	TObjectPtr<UInputAction> AccelerateAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> ReverseAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> SteeringAction;
@@ -135,6 +138,7 @@ private:
 	float CurrentThrottle = 0.f;
 	float CurrentSteering = 0.f;
 	bool bIsBraking = false;
+	bool bIsReversing = false;
 	float TimeSinceSpawn = 0.f;
 	bool bIsHandbraking = false;
 	bool bInputFullySetup = false;
@@ -147,7 +151,8 @@ private:
 	void OnVehicleHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	void HandleThrottle(const FInputActionValue& Value);
+	void HandleAccelerate(const FInputActionValue& Value);
+	void HandleReverse(const FInputActionValue& Value);
 	void HandleSteering(const FInputActionValue& Value);
 	void HandleBrake(const FInputActionValue& Value);
 	void HandleHandbrake(const FInputActionValue& Value);
