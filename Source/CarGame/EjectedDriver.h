@@ -10,12 +10,12 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
+class USkeletalMeshComponent;
 
 /**
  * Actor representing the driver ejected from the vehicle on heavy impact.
  * Spawned with physics simulation and launched into the air.
- * Uses a static mesh (sphere) by default. Replace BodyMesh with a
- * USkeletalMeshComponent + PhysicsAsset in a Blueprint subclass for proper ragdoll.
+ * Invisible sphere handles physics, wolf skeletal mesh provides the visuals.
  */
 UCLASS()
 class CARGAME_API AEjectedDriver : public AActor
@@ -25,8 +25,13 @@ class CARGAME_API AEjectedDriver : public AActor
 public:
 	AEjectedDriver();
 
+	/** Invisible sphere for physics collision */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> BodyMesh;
+
+	/** Visual wolf mesh — the actual driver that gets yeeted */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USkeletalMeshComponent> DriverVisualMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArm;

@@ -3,13 +3,14 @@
 
 #include "EjectedDriver.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AEjectedDriver::AEjectedDriver()
 {
-	// Body mesh - a sphere by default, simulating physics
+	// Invisible sphere for physics — the collision dungeon master
 	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
 	SetRootComponent(BodyMesh);
 	BodyMesh->SetSimulatePhysics(true);
@@ -26,6 +27,19 @@ AEjectedDriver::AEjectedDriver()
 	{
 		BodyMesh->SetStaticMesh(SphereMeshAsset.Object);
 		BodyMesh->SetWorldScale3D(FVector(0.5f));
+	}
+	BodyMesh->SetHiddenInGame(true);
+
+	// Wolf visual mesh — "Take it boy!" through the windshield
+	DriverVisualMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DriverVisualMesh"));
+	DriverVisualMesh->SetupAttachment(BodyMesh);
+	DriverVisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WolfMeshFinder(
+		TEXT("/Game/Fab/Realistic_Wolf_3D_Model_2_0_Demo_Free_Download_/wolf_demo.wolf_demo"));
+	if (WolfMeshFinder.Succeeded())
+	{
+		DriverVisualMesh->SetSkeletalMesh(WolfMeshFinder.Object);
 	}
 
 	// Spring arm for smooth camera follow — absolute rotation so it doesn't

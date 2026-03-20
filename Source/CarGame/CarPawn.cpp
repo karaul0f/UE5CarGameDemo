@@ -350,6 +350,13 @@ void ACarPawn::EjectDriver(FVector ImpactNormal)
 
 	if (ActiveEjectedDriver)
 	{
+		// Copy driver scale from Blueprint — "you got the right size, boy!"
+		if (ActiveEjectedDriver->DriverVisualMesh && DriverMesh)
+		{
+			ActiveEjectedDriver->DriverVisualMesh->SetRelativeScale3D(
+				DriverMesh->GetRelativeScale3D());
+		}
+
 		// Prevent sphere from colliding with the car — otherwise it gets stuck
 		// or physics freaks out from the overlap at spawn
 		if (ActiveEjectedDriver->BodyMesh)
