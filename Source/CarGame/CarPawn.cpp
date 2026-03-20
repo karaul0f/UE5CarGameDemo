@@ -334,9 +334,14 @@ void ACarPawn::EjectDriver(FVector ImpactNormal)
 	DriverMesh->SetVisibility(false);
 
 	FVector CarVelocity = VehicleCollision->GetPhysicsLinearVelocity();
-	FVector LaunchDir = (-ImpactNormal + FVector::UpVector).GetSafeNormal();
-	FVector LaunchVelocity = CarVelocity * EjectionLaunchSpeedMultiplier
-		+ LaunchDir * EjectionUpwardBoost
+	float CarSpeed = CarVelocity.Size();
+
+	// Driver launches in the car's velocity direction — "fly away!"
+	FVector ForwardDir = CarSpeed > 10.f
+		? CarVelocity.GetSafeNormal()
+		: GetActorForwardVector();
+
+	FVector LaunchVelocity = ForwardDir * CarSpeed * EjectionLaunchSpeedMultiplier
 		+ FVector::UpVector * EjectionUpwardBoost;
 
 	FVector SpawnLocation = VehicleCollision->GetComponentLocation() + FVector(0.f, 0.f, 55.f);
