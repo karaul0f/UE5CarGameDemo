@@ -2,7 +2,6 @@
 // "That's the right way to do it!" - Van Darkholme
 
 #include "EjectedDriver.h"
-#include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -10,42 +9,25 @@
 
 AEjectedDriver::AEjectedDriver()
 {
-	// Invisible sphere for physics — the collision dungeon master
-	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
-	SetRootComponent(BodyMesh);
-	BodyMesh->SetSimulatePhysics(true);
-	BodyMesh->SetEnableGravity(true);
-	BodyMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	BodyMesh->SetCollisionResponseToAllChannels(ECR_Block);
-	BodyMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	BodyMesh->SetNotifyRigidBodyCollision(true);
-	BodyMesh->BodyInstance.bUseCCD = true;
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(
-		TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-	if (SphereMeshAsset.Succeeded())
-	{
-		BodyMesh->SetStaticMesh(SphereMeshAsset.Object);
-		BodyMesh->SetWorldScale3D(FVector(0.5f));
-	}
-	BodyMesh->SetHiddenInGame(true);
-
-	// Wolf visual mesh — "Take it boy!" through the windshield
-	DriverVisualMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DriverVisualMesh"));
-	DriverVisualMesh->SetupAttachment(BodyMesh);
-	DriverVisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// Skeletal mesh as root — ragdoll physics, no proxy shapes, pure muscle
+	RagdollMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RagdollMesh"));
+	SetRootComponent(RagdollMesh);
+	RagdollMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	RagdollMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	RagdollMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	RagdollMesh->SetEnableGravity(true);
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WolfMeshFinder(
 		TEXT("/Game/Fab/Realistic_Wolf_3D_Model_2_0_Demo_Free_Download_/wolf_demo.wolf_demo"));
 	if (WolfMeshFinder.Succeeded())
 	{
-		DriverVisualMesh->SetSkeletalMesh(WolfMeshFinder.Object);
+		RagdollMesh->SetSkeletalMesh(WolfMeshFinder.Object);
 	}
 
 	// Spring arm for smooth camera follow — absolute rotation so it doesn't
 	// tumble with the physics body like a dungeon slave
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(BodyMesh);
+	SpringArm->SetupAttachment(RagdollMesh);
 	SpringArm->TargetArmLength = 500.f;
 	SpringArm->SetAbsolute(false, true, false);
 	SpringArm->bEnableCameraLag = true;
@@ -62,12 +44,19 @@ AEjectedDriver::AEjectedDriver()
 
 void AEjectedDriver::Launch(FVector LaunchVelocity)
 {
-	if (BodyMesh)
+	if (RagdollMesh)
 	{
-		BodyMesh->SetPhysicsLinearVelocity(LaunchVelocity);
+		// Enable ragdoll — "it's all physics from here, boy!"
+		RagdollMesh->SetSimulatePhysics(true);
+		RagdollMesh->SetAllBodiesSimulatePhysics(true);
+		RagdollMesh->SetAllBodiesPhysicsBlendWeight(1.0f);
+		RagdollMesh->WakeAllRigidBodies();
 
-		// Add random angular velocity for that sweet tumbling ragdoll effect
+		// Apply velocity to all bones for proper ragdoll launch
+		RagdollMesh->SetAllPhysicsLinearVelocity(LaunchVelocity);
+
+		// Random angular velocity on each bone for tumbling ragdoll goodness
 		FVector AngularVelocity = FMath::VRand() * 720.f;
-		BodyMesh->SetPhysicsAngularVelocityInDegrees(AngularVelocity);
+		RagdollMesh->SetAllPhysicsAngularVelocityInDegrees(AngularVelocity);
 	}
 }

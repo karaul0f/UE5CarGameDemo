@@ -9,13 +9,11 @@
 
 class USpringArmComponent;
 class UCameraComponent;
-class UStaticMeshComponent;
 class USkeletalMeshComponent;
 
 /**
  * Actor representing the driver ejected from the vehicle on heavy impact.
- * Spawned with physics simulation and launched into the air.
- * Invisible sphere handles physics, wolf skeletal mesh provides the visuals.
+ * Spawned with ragdoll physics — the skeletal mesh IS the physics body.
  */
 UCLASS()
 class CARGAME_API AEjectedDriver : public AActor
@@ -25,13 +23,9 @@ class CARGAME_API AEjectedDriver : public AActor
 public:
 	AEjectedDriver();
 
-	/** Invisible sphere for physics collision */
+	/** Skeletal mesh with ragdoll physics — the driver himself */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> BodyMesh;
-
-	/** Visual wolf mesh — the actual driver that gets yeeted */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<USkeletalMeshComponent> DriverVisualMesh;
+	TObjectPtr<USkeletalMeshComponent> RagdollMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArm;
@@ -39,7 +33,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> Camera;
 
-	/** Launch the body with the given velocity and add random tumble spin */
+	/** Launch the ragdoll with the given velocity and add random tumble spin */
 	UFUNCTION(BlueprintCallable, Category = "Ejection")
 	void Launch(FVector LaunchVelocity);
 };
