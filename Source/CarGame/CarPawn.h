@@ -38,7 +38,7 @@ public:
 	TObjectPtr<UStaticMeshComponent> CarBodyMesh;
 
 	/** Visual mesh for the driver sitting inside */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Driver")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Driver")
 	TObjectPtr<USkeletalMeshComponent> DriverMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")

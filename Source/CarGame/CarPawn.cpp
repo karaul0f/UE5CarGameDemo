@@ -60,12 +60,19 @@ ACarPawn::ACarPawn()
 		CarBodyMesh->SetRelativeScale3D(FVector(4.f, 2.f, 0.8f));
 	}
 
-	// ---- Driver mesh (skeletal — assign in Blueprint) ----
-	DriverMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DriverMesh"));
+	// ---- Driver mesh (wolf skeletal mesh) ----
+	DriverMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DriverSkeletalMesh"));
 	DriverMesh->SetupAttachment(VehicleCollision);
 	DriverMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DriverMesh->SetRelativeLocation(FVector(-30.f, -25.f, 60.f));
 	DriverMesh->SetRelativeScale3D(FVector(0.4f));
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WolfMeshFinder(
+		TEXT("/Game/Fab/Realistic_Wolf_3D_Model_2_0_Demo_Free_Download_/wolf_demo.wolf_demo"));
+	if (WolfMeshFinder.Succeeded())
+	{
+		DriverMesh->SetSkeletalMesh(WolfMeshFinder.Object);
+	}
 
 	// ---- Third-person camera ----
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
