@@ -83,7 +83,7 @@ public:
 	float EjectionImpactThreshold = 200000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ejection")
-	float EjectionLaunchSpeedMultiplier = 0.75f;
+	float EjectionLaunchSpeedMultiplier = 1.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ejection")
 	float EjectionUpwardBoost = 400.f;
@@ -129,7 +129,7 @@ public:
 	TObjectPtr<AEjectedDriver> ActiveEjectedDriver = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = "Ejection")
-	void EjectDriver(FVector ImpactNormal);
+	void EjectDriver();
 
 	UFUNCTION(BlueprintCallable, Category = "Ejection")
 	void ResetDriver();
@@ -142,6 +142,9 @@ private:
 	float TimeSinceSpawn = 0.f;
 	bool bIsHandbraking = false;
 	bool bInputFullySetup = false;
+
+	/** Cached velocity from previous tick — physics hasn't mangled it yet */
+	FVector CachedPreHitVelocity = FVector::ZeroVector;
 
 	bool TrySetupInput();
 	void CreateDefaultInputActions();

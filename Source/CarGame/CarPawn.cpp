@@ -128,6 +128,9 @@ void ACarPawn::Tick(float DeltaTime)
 
 	if (!bIsDriverEjected)
 	{
+		// Cache velocity BEFORE physics resolves any collision this frame
+		// so EjectDriver gets the real pre-impact speed, not post-bounce garbage
+		CachedPreHitVelocity = VehicleCollision->GetPhysicsLinearVelocity();
 		ApplyVehiclePhysics(DeltaTime);
 	}
 }
@@ -319,30 +322,35 @@ void ACarPawn::OnVehicleHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	const float ImpactMagnitude = NormalImpulse.Size();
 	if (ImpactMagnitude >= EjectionImpactThreshold)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("IMPACT! Force: %.0f -> EJECTING DRIVER!"), ImpactMagnitude);
-		EjectDriver(Hit.ImpactNormal);
+		FVector PostHitVel = VehicleCollision->GetPhysicsLinearVelocity();
+		UE_LOG(LogTemp, Warning, TEXT("IMPACT! Force: %.0f | PreHitSpeed: %.0f | PostHitSpeed: %.0f -> EJECTING!"),
+			ImpactMagnitude, CachedPreHitVelocity.Size(), PostHitVel.Size());
+		EjectDriver();
 	}
 }
 
 // ---- Ejection & Reset ----
 
-void ACarPawn::EjectDriver(FVector ImpactNormal)
+void ACarPawn::EjectDriver()
 {
 	if (bIsDriverEjected) return;
 	bIsDriverEjected = true;
 
 	DriverMesh->SetVisibility(false);
 
-	FVector CarVelocity = VehicleCollision->GetPhysicsLinearVelocity();
-	float CarSpeed = CarVelocity.Size();
+	// Use cached pre-collision velocity — by the time OnHit fires,
+	// physics already zeroed/reversed the real velocity. "Ass we can!"
+	float PreHitSpeed = CachedPreHitVelocity.Size();
 
-	// Driver launches in the car's velocity direction — "fly away!"
-	FVector ForwardDir = CarSpeed > 10.f
-		? CarVelocity.GetSafeNormal()
+	FVector HorizontalDir = PreHitSpeed > 10.f
+		? CachedPreHitVelocity.GetSafeNormal()
 		: GetActorForwardVector();
+	HorizontalDir.Z = 0.f;
+	HorizontalDir.Normalize();
 
-	FVector LaunchVelocity = ForwardDir * CarSpeed * EjectionLaunchSpeedMultiplier
-		+ FVector::UpVector * EjectionUpwardBoost;
+	// 45-degree launch: equal horizontal and vertical components — "fly away!"
+	FVector LaunchDir = (HorizontalDir + FVector::UpVector).GetSafeNormal();
+	FVector LaunchVelocity = LaunchDir * PreHitSpeed * EjectionLaunchSpeedMultiplier;
 
 	FVector SpawnLocation = VehicleCollision->GetComponentLocation() + FVector(0.f, 0.f, 55.f);
 
