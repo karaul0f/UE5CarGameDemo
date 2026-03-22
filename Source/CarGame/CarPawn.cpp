@@ -77,7 +77,7 @@ ACarPawn::ACarPawn()
 	// ---- Third-person camera ----
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(VehicleCollision);
-	SpringArm->TargetArmLength = 700.f;
+	SpringArm->TargetArmLength = 350.f;
 	SpringArm->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->CameraLagSpeed = 5.f;
