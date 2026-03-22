@@ -13,7 +13,7 @@ class USkeletalMeshComponent;
 
 /**
  * Actor representing the driver ejected from the vehicle on heavy impact.
- * Spawned with ragdoll physics — the skeletal mesh IS the physics body.
+ * Ragdoll via PhysicsAsset on the skeletal mesh — pure physics, no proxy shapes.
  */
 UCLASS()
 class CARGAME_API AEjectedDriver : public AActor

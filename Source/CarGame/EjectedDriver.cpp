@@ -9,13 +9,16 @@
 
 AEjectedDriver::AEjectedDriver()
 {
-	// Skeletal mesh as root — ragdoll physics, no proxy shapes, pure muscle
+	// Skeletal mesh as root — ragdoll via existing PhysicsAsset on the mesh
 	RagdollMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RagdollMesh"));
 	SetRootComponent(RagdollMesh);
+	RagdollMesh->SetCollisionObjectType(ECC_PhysicsBody);
 	RagdollMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	RagdollMesh->SetCollisionResponseToAllChannels(ECR_Block);
 	RagdollMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	RagdollMesh->SetEnableGravity(true);
+	RagdollMesh->SetNotifyRigidBodyCollision(true);
+	RagdollMesh->BodyInstance.bUseCCD = true;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WolfMeshFinder(
 		TEXT("/Game/Fab/Realistic_Wolf_3D_Model_2_0_Demo_Free_Download_/wolf_demo.wolf_demo"));
@@ -31,9 +34,10 @@ AEjectedDriver::AEjectedDriver()
 	SpringArm->TargetArmLength = 500.f;
 	SpringArm->SetAbsolute(false, true, false);
 	SpringArm->bEnableCameraLag = true;
-	SpringArm->CameraLagSpeed = 3.f;
+	SpringArm->CameraLagSpeed = 8.f;
+	SpringArm->CameraLagMaxDistance = 300.f;
 	SpringArm->bEnableCameraRotationLag = true;
-	SpringArm->CameraRotationLagSpeed = 3.f;
+	SpringArm->CameraRotationLagSpeed = 8.f;
 	SpringArm->bDoCollisionTest = true;
 	SpringArm->SetWorldRotation(FRotator(-25.f, 0.f, 0.f));
 
@@ -46,8 +50,7 @@ void AEjectedDriver::Launch(FVector LaunchVelocity)
 {
 	if (RagdollMesh)
 	{
-		// Enable ragdoll — "it's all physics from here, boy!"
-		RagdollMesh->SetSimulatePhysics(true);
+		// Enable ragdoll on all bodies — PhysicsAsset provides the collision bodies
 		RagdollMesh->SetAllBodiesSimulatePhysics(true);
 		RagdollMesh->SetAllBodiesPhysicsBlendWeight(1.0f);
 		RagdollMesh->WakeAllRigidBodies();
@@ -55,7 +58,7 @@ void AEjectedDriver::Launch(FVector LaunchVelocity)
 		// Apply velocity to all bones for proper ragdoll launch
 		RagdollMesh->SetAllPhysicsLinearVelocity(LaunchVelocity);
 
-		// Random angular velocity on each bone for tumbling ragdoll goodness
+		// Random angular velocity for tumbling — "full body workout!"
 		FVector AngularVelocity = FMath::VRand() * 720.f;
 		RagdollMesh->SetAllPhysicsAngularVelocityInDegrees(AngularVelocity);
 	}
